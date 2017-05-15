@@ -42,43 +42,32 @@ Please (do your best to) stick to [Google's C++ style guide](https://google.gith
 
 ## Project Instructions and Rubric
 
-Note: regardless of the changes you make, your project must be buildable using
-cmake and make!
+### Describe the effect each of the P, I, D components had in your implementation
 
-More information is only accessible by people who are already enrolled in Term 2
-of CarND. If you are enrolled, see [the project page](https://classroom.udacity.com/nanodegrees/nd013/parts/40f38239-66b6-46ec-ae68-03afd8a601c8/modules/f1820894-8322-4bb3-81aa-b26b3c6dcbaf/lessons/e8235395-22dd-4b87-88e0-d108c5e5bbf4/concepts/6a4d8d42-6a04-4aa6-b284-1697c0fd6562)
-for instructions and the project rubric.
+* The P component produces an output that is propotional to the current error, CTE. It is calculated by multiplying the error by a constant Kp, the proportional gain. For a car, the steering angle should be propotional to CTE, the car makes a sharper turn when CTE is larger. However, the car should avoid sharp turn while in high speed. This is intuitive since when car is running higher speed, it could reduce CTE with smaller sterring angle. We calculate the P component by multiple the proportional gain Kp to CTE divided by current car speed (Kp*(CTE/speed)). Using P component along, the CTE can be reduced to zero quickly with a large Kp value, but it results in oscillation in the track.
+* The I component is the sum of the instantaneous error over time and gives the accumulated offset that should have been corrected previously. This term should accelerates the movement of the car to intended trajectory and eliminates the residual steady-state error. We calculate this term summing all CTE and multiply it with a constant Ki. Add this component enables the car to move to trajectory point quicker with the same P term.
+* The D component is proportianl to the rate of change of CTE. This component can compensate for a changing CTE, thus inhibit more rapid changes of CTE due to propotinal term. To enable the car to follow trajectory, especially the sharp turn curve, we need to increase the P component. But increase the P component alone will result in unstable behavior, oscillate around the trajectory. By adding D component, we are able to stablize the car to keep on track.  We calculate D component by multiple the change of current CTE from previous CTE to a constant Kd.
 
-## Hints!
+### Describe how the final hyperparameters were chosen.
 
-* You don't have to follow this directory structure, but if you do, your work
-  will span all of the .cpp files here. Keep an eye out for TODOs.
+I manually tune the PID coefficients to achieve the intended result. First I set Ki and Kd to zero, and start the Kd from 0.1 and increase it until it can make the first turn. This happen when Kd go to about 0.7. But the CTE is not converge to zero. I add Ki term to make sure the CTE converge to zero before first 50 steps. Then I increase the Kd to try to make the car to keep the second turn after the bridge. The car starts oscillating when Kd go to about 1.0. To combat oscillation, I start adding D component, start from Kd at 1.0. From here, I iterated the Kp and Kd, increasing Kp to try to have the car turn, while increasing Kd to make sure it did not oscillate, until the car was able to complete the track.
 
-## Call for IDE Profiles Pull Requests
+The final hyperparameters I chose are Kp = 4.5, Ki = 0.001, Kd = 12.5
 
-Help your fellow students!
+### Result and Reflection
 
-We decided to create Makefiles with cmake to keep this project as platform
-agnostic as possible. Similarly, we omitted IDE profiles in order to we ensure
-that students don't feel pressured to use one IDE or another.
+Here is a [link](https://youtu.be/rzDsFfvd9T0) to my final video output:
 
-However! I'd love to help people get up and running with their IDEs of choice.
-If you've created a profile for an IDE that you think other students would
-appreciate, we'd love to have you add the requisite profile files and
-instructions to ide_profiles/. For example if you wanted to add a VS Code
-profile, you'd add:
+<p align="center">
+    <a href="https://www.youtube.com/watch?v=rzDsFfvd9T0">
+        <img src="https://img.youtube.com/vi/rzDsFfvd9T0/0.jpg" alt="video output">
+    </a>
+</p>
 
-* /ide_profiles/vscode/.vscode
-* /ide_profiles/vscode/README.md
+Possible improvements for this implementation include:
 
-The README should explain what the profile does, how to take advantage of it,
-and how to install it.
+* The vehicle still has large CTEs even it can keep on track. This may indicate those hyperparameters are not optimal. Techniques such as Twiddle may be used to find the optimal hyparameters. We'll need to be able to control the simulator in order to implement such technique.
+* The car is a little shaky. The steering angle seems changing too often. This may also an indication of suboptimal hyparameters.
+* I used a constant throttle in the implementation. Adding a speed PID may enable the car to run faster and smoother. I tried but failed to find a simple implementation of speed PID. This is one improvement I need to play around.
+* Without trajectory information, it could be hard to optimize the controller. Maybe we can estimate the trajectory from CTE and car heading?
 
-Frankly, I've never been involved in a project with multiple IDE profiles
-before. I believe the best way to handle this would be to keep them out of the
-repo root to avoid clutter. My expectation is that most profiles will include
-instructions to copy files to a new location to get picked up by the IDE, but
-that's just a guess.
-
-One last note here: regardless of the IDE used, every submitted project must
-still be compilable with cmake and make./
