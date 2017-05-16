@@ -44,7 +44,7 @@ Please (do your best to) stick to [Google's C++ style guide](https://google.gith
 
 ### Describe the effect each of the P, I, D components had in your implementation
 
-* The P component produces an output that is propotional to the current error, CTE. It is calculated by multiplying the error by a constant Kp, the proportional gain. For a car, the steering angle should be propotional to CTE, the car makes a sharper turn when CTE is larger. However, the car should avoid sharp turn while in high speed. This is intuitive since when car is running higher speed, it could reduce CTE with smaller sterring angle. We calculate the P component by multipling the proportional gain Kp to CTE divided by current car speed (Kp*(CTE/speed)). However, using P component along, the CTE can be reduced to zero quickly with a large Kp value, but it also results in oscillation in the track.
+* The P component produces an output that is propotional to the current error, CTE. It is calculated by multiplying the error by a constant Kp, the proportional gain. For a car, the steering angle should be propotional to CTE, it makes a sharper turn when CTE is larger. However, the car should avoid sharp turn while in high speed. This is intuitive since when car is running higher speed, it could reduce CTE with smaller sterring angle in the same interval. We calculate the P component by multipling the proportional gain Kp with CTE divided by current car speed (Kp*(CTE/speed)). However, using P component along, the CTE can be reduced to zero quickly with a large Kp value, but it also results in oscillation in the track.
 * The I component is the sum of the instantaneous error over time and gives the accumulated offset that should have been corrected previously. This term should accelerates the movement of the car to intended trajectory and eliminates the residual steady-state error. We calculate this term by summing all CTE and multiply it with a constant Ki. Add this component to controller enables the car to move to trajectory point quicker with the same P term.
 * The D component is proportianl to the rate of change of CTE. This component can compensate for a changing CTE, thus inhibit more rapid changes of CTE due to propotinal term. To enable the car to follow trajectory, especially the sharp turn curve, we need to increase the P component. But increase the P component alone will result in unstable behavior, oscillating around the trajectory. By adding D component, we are able to stablize the car to keep on track.  We calculate D component by multiple the change of current CTE from previous CTE to a constant Kd.
 
@@ -66,8 +66,8 @@ Here is a [link](https://youtu.be/rzDsFfvd9T0) to my final video output:
 
 Possible improvements for this implementation include:
 
-* The vehicle still has large CTEs even it can keep on track. This may indicate those hyperparameters are not optimal. Techniques such as Twiddle may be used to find the optimal hyparameters. We'll need to be able to control the simulator in order to implement such technique.
-* The car is a little shaky. The steering angle seems changing too often. This may also an indication of suboptimal hyparameters.
+* We still see large CTEs even though it can keep on track. This may indicate those hyperparameters are not optimal. Techniques such as Twiddle may be used to find the optimal hyparameters. We'll need to be able to control the simulator in order to implement such technique.
+* The car is a little shaky. The steering angle seems changes too often. This may also an indication of suboptimal hyparameters.
 * I used a constant throttle in the implementation. Adding a speed PID may enable the car to run faster and smoother. I tried but failed to find a simple implementation of speed PID. This is one improvement I need to play around.
 * Without trajectory information, it could be hard to optimize the controller. Maybe we can estimate the trajectory from CTE and car heading?
 
